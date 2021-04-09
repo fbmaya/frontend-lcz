@@ -1,0 +1,25 @@
+---
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - docker-build
+  - deploy
+
+docker-build:
+  stage: docker-build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  tags:
+    - gitlab-org
+  dependencies:
+    - <<<<<react-build>>>>>
+  script:
+    - echo "OK"
+    - export GOOGLE_APPLICATION_CREDENTIALS=/kaniko/kaniko-secret.json
+    - echo $GOOGLE_APPLICATION_CREDENTIALS_BASE64 | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination gcr.io/$GOOGLE_PROJECT_ID/$GOOGLE_IMAGE_NAME_FRONT:$CI_COMMIT_SHORT_SHA
+
